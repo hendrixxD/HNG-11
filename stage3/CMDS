@@ -1,0 +1,58 @@
+
+# Install RabbitMQ
+sudo apt-get install rabbitmq-server
+
+# Install Celery
+pip install celery
+
+# Install FLask
+pip install Flask
+
+# add a rabitmq user
+rabbitmqctl add_user myapp_user strong_password
+# Add your user to the management interface
+sudo rabbitmqctl set_user_tags hendrixx management
+# Give your user full permissions on the default vhost
+sudo rabbitmqctl set_permissions -p / hendrixx ".*" ".*" ".*"
+
+# rabitmq
+pyamqp://username:password@host:port/virtual_host
+pyamqp://hendrixx:DevHendrixx1-@127.0.0.1:5672//
+
+# nginx configurations
+sudo apt install nginx
+sudo cp /nginx/messaging_system /etc/nginx/sites-available/
+sudo ln -s /etc/nginx/sites-available/messaging /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo rm /etc/nginx/sites-enabled/default
+sudo systemctl restart nginx
+tail -f /var/log/nginx/messaging_system_access.log # check access logs
+tail -f /var/log/nginx/messaging_system_error.log  # check error logs
+
+
+
+# to spinup my servers
+sudo systemctl start rabbitmq-server
+celery --app celery_worker.celery worker --loglevel=info
+python run.py
+
+# rabit mq interface
+http://localhost:15672
+
+# rabbit interface: http://localhost:15672
+sudo rabbitmq-plugins enable rabbitmq_management
+
+# installing ngrock
+wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+unzip ngrok-stable-linux-amd64.zip
+sudo mv ngrok /usr/local/bin/
+
+# installing localtunnel
+sudo npm install -g localtunnel
+sudo systemctl restart nginx
+sudo -lt 80 # where nginx is serving the application
+  - u get this: https://soft-ravens-burn.loca.lt
+  - to get your passcode: https://loca.lt/mytunnelpassword - on your local machine
+
+# ensure it runs
+nohup lt --port 80 &
