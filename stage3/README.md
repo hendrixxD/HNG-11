@@ -35,12 +35,38 @@
       - Submit the endpoint and screen recording.
    - Submission Details:
      - Submission Requirements:
-     - Provide the ngrok endpoint for testing.
-     - Submit the screen recording walk-through.
-     - Ensure all requirements are met and the application functions correctly.
+       - Provide the ngrok endpoint for testing.
+       - Submit the screen recording walk-through.
+       - Ensure all requirements are met and the application functions correctly.
  - Evaluation Criteria:
      - Functionality: All specified features must work correctly.
      - Clarity:
        - Code and configurations must be well-documented.
      - Presentation:
        - The screen recording should be clear and comprehensive.
+
+### File Structure
+```
+-- stage3
+   -- app
+      -- __init__.py
+      -- config.py
+      -- task.py
+      -- views.py
+   -- ngix
+      -- messaging
+   -- .env
+   -- .gitignore
+   -- celery_worker.py
+   -- run.py
+   -- requirements.txt
+   -- README.md
+```
+<hr>
+
+### submision requirments met
+
+1. sending email using SMTP at `/sendmail` endpoint
+2. Logging the current time at `/talktome` endpoint
+3. serrving the application using nginx
+4. exposing the endpoint using ngrok and tested as well.
