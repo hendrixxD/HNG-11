@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from .tasks import send_email
 from datetime import datetime
 from .config import Config
+from datetime import datetime
+import pytz
 
 main = Blueprint('main', __name__)
 
@@ -17,10 +19,13 @@ def handle_request():
         send_email.delay(recipient)
         return jsonify({"message": f"Email queued for sending to {recipient}"})
     elif 'talktome' in request.args:
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Get the current time in Nigeria (WAT)
+        nigeria_tz = pytz.timezone('Africa/Lagos')
+        current_time = datetime.now(nigeria_tz).strftime("%Y-%m-%d %H:%M:%S %Z")
+        # current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(Config.LOG_FILE, 'a') as log_file:
-            log_file.write(current_time)
-        return jsonify({"message": "Current Time Logged"})
+            log_file.write(current_time + "\n")
+        return jsonify({"message": f"Current Time Logged:{current_time}"})
     else:
         return jsonify({"message": "Invalid request"})
 
@@ -33,7 +38,7 @@ this route /logs:
 def show_logs():
     try:
         with open(Config.LOG_FILE, 'r') as log_file:
-            logs = log_file.read()
+            logs = ''.join(log_file.readlines())
         return logs, 200, {'Content-Type': 'text/plain'}
     except FileNotFoundError:
         return "Log file not found", 404

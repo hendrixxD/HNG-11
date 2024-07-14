@@ -3,8 +3,8 @@ import os
 import sys
 
 """
-this function calls our application
+this code serves as the entrypoint to our application
 """
 if __name__ == '__main__':
-    app = create_app()
+    app, _ = create_app()
     app.run(debug=True)

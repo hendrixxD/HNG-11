@@ -69,4 +69,41 @@
 1. sending email using SMTP at `/sendmail` endpoint
 2. Logging the current time at `/talktome` endpoint
 3. serrving the application using nginx
-4. exposing the endpoint using ngrok and tested as well.
+4. exposing the endpoint using ngrok and tested as well [here]('https://be96-2a05-d018-184-c400-9a02-51f8-f2db-19e5.ngrok-free.app/?sendmail=devhendrixx@gmail.com').
+
+_NOTE_
+How to run the app:
+- spin up flask server:
+
+  ```ssh
+  python3 run.py
+  ```
+- spin up celery:
+
+  ```ssh
+  celery --app celery_worker.celery worker
+  ```
+- the application is served behind nginx and endpoints exposed using `ngrok`
+
+  ```ssh
+  ngrok http 80
+  ```
+ 
+  but dont wory, `ngrok` is already running in the background, you can go ahead with testing the endpoints at:
+  - `sending mail`: https://be96-2a05-d018-184-c400-9a02-51f8-f2db-19e5.ngrok-free.app/?sendmail=devhendrixx@gmail.com
+  - `logging the current time`: https://be96-2a05-d018-184-c400-9a02-51f8-f2db-19e5.ngrok-free.app/?talktome
+  - `fetching logs`: https://be96-2a05-d018-184-c400-9a02-51f8-f2db-19e5.ngrok-free.app/logs
+
+There is a file: `filer_perm.sh`:
+  - you may get permission denied on `/var/log/messaging_system.log` when spinning up flask server
+  - to solve that:
+    ```ssh
+    sudo bash file_perm.sh
+    ```
+    Or
+    ```ssh
+    bash file_perm.sh
+    ```
+    which ever that works for ya.
+      
+
