@@ -19,21 +19,24 @@ Your task is to set up a new instance of the assigned boilerplate using Infrastr
 6. Logging:
    - Configure stderr logs to be saved in `/var/log/stage_5b/error.log` and stdout logs in `/var/log/stage_5b/out.log`.
    - Ensure both log files are owned by the hng user.
-7. Instructions:
-   - User and Directory Setup:
+     
+ ## Instructions:
+  1. User and Directory Setup:
      - Create a user named hng with sudo privileges.
      - Clone your repository into the `/opt` directory with the name `stage_5b (i.e., /opt/stage_5b)`, and ensure it is owned by the hng user.
-  - Database and Dependencies:
+  2. Database and Dependencies:
      - Install PostgreSQL and save the admin credentials in `/var/secrets/pg_pw.txt`.
      - Install all application dependencies, including databases and messaging queues, and configure the environment variables or application settings accordingly.
-  - Application and Proxy Setup:
+  3. Application and Proxy Setup:
      - Ensure the application is running on `127.0.0.1:3000` without exposing port `3000` externally.
      - Install Nginx 1.26 and configure it to reverse proxy requests from port 80 to your application.
-  - Logging Configuration:
-     - Set up logging so that stderr logs are written to `/var/log/stage_5b/error.log` and stdout logs to `/var/log/stage_5b/out.log`, with both files owned by the hng user.
+  4. Logging Configuration:
+     - Set up logging so that
+       - _stderr logs_ are written to `/var/log/stage_5b/error.log`, and
+       - _stdout logs_ to `/var/log/stage_5b/out.log`, with both files owned by the hng user.
 
 **Grading**
-Mentors will run the Ansible playbook using the command:
+A mentor will run the Ansible playbook using the command:
   ```ssh
    ansible-playbook main.yaml -b
   ```
