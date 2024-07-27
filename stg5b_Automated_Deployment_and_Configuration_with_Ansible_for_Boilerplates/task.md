@@ -1,5 +1,6 @@
 # Automated Deployment and Configuration with Ansible for Boilerplates
 Overview: You will be assigned one of the 7 boilerplates from Stage 4.
+  - [here](https://github.com/hngprojects/hng_boilerplate_csharp_web/tree/devops)
 
 Your task is to set up a new instance of the assigned boilerplate using Infrastructure as Code (IaC) with Ansible. The setup should include the following:
 1. Clone and Deploy:
