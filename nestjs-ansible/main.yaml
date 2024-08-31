@@ -1,0 +1,208 @@
+
+- name: Setup NestJS Boilerplate Application
+  hosts: hng
+  become: true
+  vars:
+    pg_user: "devops"
+    pg_password: "hendrixx"
+    pg_db: "hendrixxd"
+    app_dir: /opt/stage_5b
+    app_user: hng
+    node_version: "20.x"
+
+  tasks:
+    - name: Install ACL and Ansible Core
+      apt:
+        name: 
+          - acl
+          - ansible-core
+        state: present
+        update_cache: yes
+      become: yes
+
+    - name: Create hng user with sudo privileges
+      user:
+        name: hng
+        password: "{{ 'hng_password' | password_hash('sha512') }}"
+        groups: sudo
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Create necessary directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: hng
+        group: hng
+        mode: '0755'
+      loop:
+        - /opt/stage_5b
+        - /var/secrets
+        - /var/log/stage_5b
+
+    - name: Save PostgreSQL admin credentials
+      copy:
+        content: "PG_USER={{ pg_user }}\nPG_PASSWORD={{ pg_password }}\nPG_DB={{ pg_db }}"
+        dest: /var/secrets/pg_pw.txt
+        owner: hng
+        group: hng
+        mode: '0600'
+
+    - name: Install Node.js 20.x
+      shell: |
+        curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - npm
+          - postgresql
+          - redis-server
+          - nginx
+          - python3-psycopg2
+        state: present
+        update_cache: yes  
+
+    - name: Install NestJS CLI
+      npm:
+        name: "@nestjs/cli"
+        global: yes
+
+    - name: Clone the repository
+      git:
+        repo: 'https://github.com/hngprojects/hng_boilerplate_nestjs.git'
+        dest: /opt/stage_5b
+        version: devops
+        force: yes
+      become_user: hng
+    
+    - name: Set permissions for node_modules directory
+      file:
+        path: "{{ app_dir }}/node_modules"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Install global npm dependencies
+      npm:
+        name: "{{ item }}"
+        global: yes
+        state: present
+      with_items:
+        - typescript
+        - ts-node-dev
+        - express
+
+    - name: Install npm dependencies
+      npm:
+        path: /opt/stage_5b
+        state: present
+      become_user: hng
+
+    - name: Copy .env.example to .env.j2
+      copy:
+        src: ".env.example"
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0600'
+      become_user: "{{ app_user }}"
+
+    - name: Build TypeScript code
+      command: npm run build
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: "{{ app_user }}"
+
+    - name: Configure PostgreSQL
+      become_user: postgres
+      postgresql_db:
+        name: "{{ pg_db }}"
+        encoding: UTF8
+        lc_collate: en_US.UTF-8
+        lc_ctype: en_US.UTF-8
+        template: template0
+        state: present
+
+    - name: Ensure PostgreSQL user exists
+      become_user: postgres
+      postgresql_user:
+        name: "{{ pg_user }}"
+        password: "{{ pg_password }}"
+        state: present
+
+    - name: Ensure PostgreSQL user has access to the database
+      become_user: postgres
+      postgresql_privs:
+        db: "{{ pg_db }}"
+        role: "{{ pg_user }}"
+        privs: ALL
+        type: database
+        objs: "{{ pg_db }}"
+
+    - name: Start and enable Redis service
+      service:
+        name: redis-server
+        state: started
+        enabled: yes
+
+    - name: Setup Nginx configuration
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/stage_5b
+      notify:
+        - Restart Nginx
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/stage_5b
+        dest: /etc/nginx/sites-enabled/stage_5b
+        state: link
+
+    - name: Disable default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify:
+        - Restart Nginx
+
+    - name: Ensure logging directories exist
+      file:
+        path: /var/log/stage_5b
+        state: directory
+        owner: hng
+        group: hng
+        mode: '0755'
+
+    - name: Create error log file
+      file:
+        path: /var/log/stage_5b/error.log
+        state: touch
+        owner: hng
+        group: hng
+        mode: '0644'
+
+    - name: Create out log file
+      file:
+        path: /var/log/stage_5b/out.log
+        state: touch
+        owner: hng
+        group: hng
+        mode: '0644'
+
+    - name: Start the application
+      shell: |
+        sudo -u hng npm run start:dev > /var/log/stage_5b/out.log 2> /var/log/stage_5b/error.log &
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: "{{ app_user }}"
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

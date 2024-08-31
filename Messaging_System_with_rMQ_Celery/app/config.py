@@ -13,7 +13,6 @@ class Config:
     This class loads environment variables for:
     - RabbitMQ connection
     - Celery configuration
-    - Logging
     - SMTP server settings
 
     All configuration variables are loaded from a .env file.
