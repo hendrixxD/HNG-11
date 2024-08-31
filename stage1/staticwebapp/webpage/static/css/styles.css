@@ -1,0 +1,81 @@
+/* Basic reset to remove default margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #0d1117; /* GitHub background color */
+    color: #c9d1d9; /* Light grey text color */
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    text-align: center;
+    padding: 50px;
+    display: none; /* Hide the main container initially */
+}
+
+header {
+    padding: 20px 0;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 3em;
+    color: #DAA520; /* Dark golden color */
+}
+
+header h2 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #c9d1d9; /* Light grey text color */
+}
+
+header p {
+    margin: 5px 0;
+    color: #8b949e; /* Slightly darker grey text color */
+}
+
+header a {
+    color: #58a6ff; /* Light blue color for links */
+    text-decoration: none;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+/* Falling container styles */
+.falling-container {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3em;
+    color: #ff9800;
+    animation: fall 2s ease-out forwards, crack 0.5s 2s forwards;
+}
+
+@keyframes fall {
+    to {
+        top: 50%;
+        transform: translate(-50%, 50%);
+    }
+}
+
+@keyframes crack {
+    to {
+        transform: translate(-50%, 50%) rotate(20deg);
+        opacity: 0;
+    }
+}
